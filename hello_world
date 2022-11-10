@@ -1,1 +1,2 @@
 (display 'hello_world)
+(write 'test)
