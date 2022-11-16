@@ -10,7 +10,7 @@
        (cons gl hv)))))
 ;; Управление стеком
 (define (list-drop lst)
-  (and (> (length lst) 1) (cdr lst)))
+  (and (> (length lst) 0) (cdr lst)));;changed length 1 -> 0 ('(element) -> '())
 (define (list-swap lst)
   (and (> (length lst) 1) (cons (cadr lst) (cons (car lst) (cddr lst)))))
 (define (list-dup lst)
@@ -21,6 +21,10 @@
   (and (> (length lst) 2) (cons (caddr lst) (cons (cadr lst) (cons (car lst) (cdddr lst))))))
 (define (list-depth lst)
   (cons (length lst) lst))
+;;
+(define (interpret-define arr-words now-program word-counter stack-data stack-return dict)
+  (do-all arr-words now-program word-counter stack-data stack-return dict))
+;; main
 (define (interpret program stack)
   (do-all (vector->list program) (vector->list program) 0 stack '() '()))
 #|
@@ -65,4 +69,20 @@
                    ((equal? x 'or)
                     (do-all arr-words (cdr now-program) (+ 1 word-counter)
                             (cons (if (and (= (car stack-data) 0) (= (cadr stack-data) 0)) 0 -1) (cddr stack-data))  stack-return dict))
+                   ;;Операции со стеком
+                   ((equal? x 'drop)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-drop stack-data)  stack-return dict))
+                   ((equal? x 'swap)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-swap stack-data)  stack-return dict))
+                   ((equal? x 'dup)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-dup stack-data)  stack-return dict))
+                   ((equal? x 'over)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-over stack-data)  stack-return dict))
+                   ((equal? x 'rot)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-rot stack-data)  stack-return dict))
+                   ((equal? x 'depth)
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-depth stack-data)  stack-return dict))
+                   ;; Управляющие конструкции
+                   ((equal x 'define)
+                    (interpret-define arr-words (cdr now-program) stack-data stack-return dict))
                    (else (display 'coming_soon))))))))
