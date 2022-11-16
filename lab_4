@@ -83,6 +83,6 @@
                    ((equal? x 'depth)
                     (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-depth stack-data)  stack-return dict))
                    ;; Управляющие конструкции
-                   ((equal x 'define)
-                    (interpret-define arr-words (cdr now-program) stack-data stack-return dict))
+;                   ((equal x 'define)
+;                    (interpret-define arr-words (cdr now-program) stack-data stack-return dict))
                    (else (display 'coming_soon))))))))
