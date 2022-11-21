@@ -16,7 +16,7 @@
 (define (list-dup lst)
   (cons (car lst) (safe-cons (car lst) (cdr lst))))
 (define (list-over lst)
-  (and (> (length lst) 1) (safe-cons (cadr (reverse lst)))))
+  (and (> (length lst) 1) (safe-cons (cadr (reverse lst)) (cdr list))))
 (define (list-rot lst)
   (and (> (length lst) 2) (safe-cons (caddr lst) (safe-cons (cadr lst) (safe-cons (car lst) (cdddr lst))))))
 (define (list-depth lst)
