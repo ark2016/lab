@@ -113,7 +113,36 @@
                     (interpret-define arr-words (cdr now-program)(+ 1 word-counter) stack-data stack-return dict))
                    ;((equal? x 'if)
                    ;(interpret-if arr-words (cdr now-program)(+ 1 word-counter) stack-data stack-return dict))
+                   ((equal? x 'if)
+                    (interpret-if arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict))
+                   ((equal? x 'endif) ;в endif можно попасть только из if!
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict))
                    ((assq x dict)
                     (do-all arr-words (cdr now-program) (+ 1 word-counter)
                             (interpret (list->vector (cadr (assq x dict))) stack-data) stack-return dict))
                    (else (display 'coming_soon)(write '!!!!)(display dict))))))))
+                   
+(define (interpret-if arr-words now-program word-counter stack-data stack-return dict)
+  (let ((cnd (car stack-data)))
+    (force (or (and cnd
+                     (delay (do-all arr-words
+                                    (cdr now-program)
+                                    (+ 1 word-counter)
+                                    (cdr stack-data)
+                                    stack-return
+                                    dict)))
+                (delay(do-else arr-words
+                        (cdr now-program)
+                        (+ 1 word-counter)
+                        (cdr stack-data)
+                        stack-return
+                        dict))
+                        ))))
+
+    
+
+(define (do-else arr-words now-program word-counter stack-data stack-return dict)
+  (let ((curr_word (car now-program)))
+    (if (equal? curr_word 'endif)
+        (do-all arr-words now-program word-counter stack-data stack-return dict)
+        (do-else  arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict))))
