@@ -8,9 +8,18 @@
          ((gl head)
           (hv tail))
        (cons gl hv)))))
+(define-syntax trace-ex
+  (syntax-rules ()
+    ((trace-ex expr)
+     (begin (write 'expr)
+            (display " => ")
+            (let ((x expr))
+              (write x)
+              (newline)
+              x)))))
 ;; Управление стеком
 (define (list-drop lst)
-  (and (> (length lst) 0) (cdr lst)));;changed length 1 -> 0 ('(element) -> '())
+  (and (> (length lst) 0) (cdr lst)))
 (define (list-swap lst)
   (and (> (length lst) 1) (safe-cons (cadr lst) (safe-cons (car lst) (cddr lst)))))
 (define (list-dup lst)
@@ -22,48 +31,15 @@
 (define (list-depth lst)
   (safe-cons (length lst) lst))
 ;;
-(define (interpret program stack)
+(define (interpret program stack);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (do-all (vector->list program) (vector->list program) 0 stack '() '()))
 
 (define (interpret-define arr-words now-program word-counter stack-data stack-return dict)
   (let ((x (car now-program)))
-    ;   (if (= first? 1)
-    ;      (interpret-define (cadr now-program) arr-words (cdr now-program) (+ 1 word-counter) stack-data (append stack-return (list x)) dict))))
-    (if (= word-counter 10)
-        (begin (write stack-return)
-               (write now-program))
-        (if (equal? x 'end)
-            (do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data '() (cons  (cons  (car stack-return)  (list (cdr stack-return))) dict))
-#|
-            (begin (write stack-return)
-                   (newline)
-                   (write now-program)
-                   (newline)
-                   (set! dict (cons  (cons  (cadr stack-return)  (list (cddr stack-return))) dict))
-                   (write dict)
-                   (newline)
-                   (write (assq 'x dict))
-                   (newline)
-                   (display (cadr (assq 'x dict))))
-|#
-#|
-> (interpret-define 0 '() '(define x + 100 12 -1 end) 0 '() '() '((y (10))))
-(define x + 100 12 -1)
-(end)
-((x (+ 100 12 -1)) (y (10)))
-(x (+ 100 12 -1))
-(+ 100 12 -1)
-|#
-            (interpret-define arr-words (cdr now-program) (+ 1 word-counter) stack-data (append stack-return (list x)) dict)))))
-#|
-> (assoc 'y '((x (10 + 12 - 20 / 0)) (y (10))))
-(y (10))
-> (assq 'y '((x (10 + 12 - 20 / 0)) (y (10))))
-(y (10))
-> (assq 'x '((x (10 + 12 - 20 / 0)) (y (10))))
-(x (10 + 12 - 20 / 0))
-|#
-     
+    (if (equal? x 'end)
+        (do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data '() (cons  (cons  (car stack-return)  (list (cdr stack-return))) dict))
+        (interpret-define arr-words (cdr now-program) (+ 1 word-counter) stack-data (append stack-return (list x)) dict))))
+  
 
 (define (func-call curr-stack dict)
   (if (assoc func-call dict)
@@ -76,28 +52,25 @@
 |#
   
 (define (do-all arr-words now-program word-counter stack-data stack-return dict)
+  #|
+  (display word-counter)
+  (display stack-data)
+  (newline)
+  (display now-program)
+  (newline)
+  |#
   (let ((program arr-words))
-    (cond((=(length arr-words)word-counter)  (display stack-data))
-         ; Управляющие конструкции
-         ;((and (equal? (car now-program) 'define) (not (null? (cdr now-program))))
-          ;(if (assoc (cdr now-program) dict)
-              ;(do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (func-call stack-data dict) stack-data) stack-return (safe-cons (list (cadr now-program)) dict))
-              ;(do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return (safe-cons (list (cadr now-program)) dict))))
-         ;((equal? (car now-program) 'end)
-          ;(do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return (safe-cons (reverse (car dict)) (cdr dict))))
-         ;((not (equal? '(caar dict) 'end))
-          ;(do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return (safe-cons (safe-cons (car now-program) (car dict)) (cdr dict))))
-         ;((equal? (car now-program) 'exit)
-          ;(do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict))
+    (cond((=(length arr-words)word-counter)   stack-data)
          ((number? (car now-program))
           (do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (car now-program) stack-data)  stack-return dict))
          (else (let ((x (car now-program)))
-                 (cond 
+                 (cond
+                   ((equal? x 'exit) (display stack-data))
                    ;; Aрифметические операции
                    ((equal? x '+)
                     (do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (+ (car stack-data) (cadr stack-data)) (cddr stack-data)) stack-return dict))
                    ((equal? x '-)
-                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (- (car stack-data) (cadr stack-data)) (cddr stack-data))  stack-return dict))
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (-(cadr stack-data) (car stack-data) ) (cddr stack-data))  stack-return dict))
                    ((equal? x '*)
                     (do-all arr-words (cdr now-program) (+ 1 word-counter) (safe-cons (* (car stack-data) (cadr stack-data)) (cddr stack-data))  stack-return dict))
                    ((equal? x '/)
@@ -138,12 +111,9 @@
                     (do-all arr-words (cdr now-program) (+ 1 word-counter) (list-depth stack-data) stack-return dict))
                    ((equal? x 'define)
                     (interpret-define arr-words (cdr now-program)(+ 1 word-counter) stack-data stack-return dict))
+                   ;((equal? x 'if)
+                   ;(interpret-if arr-words (cdr now-program)(+ 1 word-counter) stack-data stack-return dict))
                    ((assq x dict)
-                    ;(do-all (safe-cons arr-words (cdr (assq x dict))) (safe-cons (cdr (assq x dict)) (cdr now-program)) (+ 1 word-counter) stack-data stack-return dict)
-                    (interpret (list->vector (cadr (assq x dict))) stack-data)
-                    (do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict)
-                    (newline))
-                    ;(display (cadr (assq x dict))))
-                   (else (display 'coming_soon)(display dict))))))))
-
-
+                    (do-all arr-words (cdr now-program) (+ 1 word-counter)
+                            (interpret (list->vector (cadr (assq x dict))) stack-data) stack-return dict))
+                   (else (display 'coming_soon)(write '!!!!)(display dict))))))))
