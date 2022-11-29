@@ -1,4 +1,4 @@
-;Лебедев Аркадий, Михаил Тверитневы
+;Лебедев Аркадий, Михаил Тверитнев
 (define call/cc call-with-current-continuation)
 (define char-letter? char-alphabetic?)
 (define char-digit? char-numeric?)
