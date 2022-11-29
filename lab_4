@@ -1,3 +1,4 @@
+;Лебедев Аркадий, Михаил Тверитневы
 (define call/cc call-with-current-continuation)
 (define char-letter? char-alphabetic?)
 (define char-digit? char-numeric?)
@@ -123,6 +124,15 @@
                    (else (display 'coming_soon)(write '!!!!)(display dict))))))))
                    
 (define (interpret-if arr-words now-program word-counter stack-data stack-return dict)
+  (if (= (car stack-data) -1)
+      (do-all arr-words now-program word-counter (cdr stack-data) stack-return dict)
+      (interpret-else arr-words now-program word-counter (cdr stack-data) stack-return dict)))
+
+(define (interpret-else arr-words now-program word-counter stack-data stack-return dict)
+  (if (equal? (car now-program) 'endif)
+      (do-all arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict)
+      (interpret-else arr-words (cdr now-program) (+ 1 word-counter) stack-data stack-return dict)))
+  #|
   (let ((cnd (car stack-data)))
     (force (or (and cnd
                      (delay (do-all arr-words
@@ -138,6 +148,7 @@
                         stack-return
                         dict))
                         ))))
+|#
 
     
 
