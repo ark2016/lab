@@ -93,7 +93,7 @@
     (if (equal? (car fn) 'end)
         (cdr fn)
         (func-cont (cdr fn))))
-  (cons (list (cadr fnlist) (define-frag (cddr fnlist))) (func-cont fnlist)))
+  (safe-cons (list (cadr fnlist) (define-frag (cddr fnlist))) (func-cont fnlist)))
 
 (define (scan-if fnlist dict)
   (define (if-frag fn) ;; проматываем if
