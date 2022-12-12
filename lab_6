@@ -1,0 +1,11 @@
+(define (++ x) (+ x 1))
+;;1
+(define (check-frac str)
+  (define check-frac-arr (string->list "1234567890-/+"))
+  (define (loop arr flag-+ flag/)
+    (cond((null? arr) #t)
+         ((and (memq (car arr) check-frac-arr) (not (or (equal? (car arr) #\-) (equal? (car arr)#\/)))) (loop (cdr arr) flag-+ flag/))
+         ((and (memq (car arr) check-frac-arr) (or (equal? (car arr) #\-) (equal? (car arr) #\+)) (= flag-+ 0 flag/)) (loop (cdr arr) (++ flag-+) flag/))
+         ((and (memq (car arr) check-frac-arr) (equal? (car arr) #\/) (= flag/ 0)) (loop (cdr arr) flag-+ (++ flag/)))
+         (else #f)))
+  (loop (string->list str) 0 0))
