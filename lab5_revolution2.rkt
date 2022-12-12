@@ -104,19 +104,19 @@
     (if (equal? (car fn) 'endif)
         (cdr fn)
         (func-cont (cdr fn))))
-  (and (parse-func (if (and (equal? (car stack) -1) (drop)) ;; выражение if больше не нужно
+  (and (eval-func (if (and (equal? (car stack) -1) (drop)) ;; выражение if больше не нужно
                        (if-frag (cdr fnlist))
                        (and (drop) '())) dict) (func-cont fnlist)))
   
-(define (parse-func fnlist dict)
+(define (eval-func fnlist dict)
   (or (null? fnlist)
-      (and (equal? (car fnlist) 'if) (parse-func (let ((in-if  (scan-if fnlist dict)))
+      (and (equal? (car fnlist) 'if) (eval-func (let ((in-if  (scan-if fnlist dict)))
                                                    (if in-if
                                                        in-if
                                                        '())) dict))
-      (and (parse-op (car fnlist) dict) (parse-func (cdr fnlist) dict))))
+      (and (eval-op (car fnlist) dict) (eval-func (cdr fnlist) dict))))
 
-(define (parse-op fnel dict)
+(define (eval-op fnel dict) ;; хороший eval
   (or (null? fnel)
       ;; почему не ассоциативный массив?
       ;; Во-первых, ключевых слов не так много, и такой массив не даёт большого выигрыша в длине кода.
@@ -149,7 +149,7 @@
       ;; функции из словаря
       (let ((getdict (assq fnel dict)))
         (if getdict
-            (parse-func (cadr getdict) dict)
+            (eval-func (cadr getdict) dict)
             #f))))
 
 (define (interpret vect stack-state)
@@ -161,7 +161,7 @@
         ;; добавляем обработанное определение в словарь
         (and (equal? (car list) 'if) (loop (scan-if list dict) dict))
         ;; if - он и в Африке if
-        (and (parse-op (car list) dict) (loop (cdr list) dict)))) ;; операции и функции из словаря обрабатываются как обычно
+        (and (eval-op (car list) dict) (loop (cdr list) dict)))) ;; операции и функции из словаря обрабатываются как обычно
   
   
   (begin (set! stack stack-state)
