@@ -1,6 +1,6 @@
 (load "unit-test.scm")
 
-
+;; Аркадий Лебедев, Михаил Тверитнев
 ;; program ::= (( define | if | func | op) program) | exit | null
 ;; define ::= scan-func -> dict
 ;; func ::= op func
