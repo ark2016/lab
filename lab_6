@@ -11,9 +11,12 @@
   (loop (string->list str) 0 0))
 
 ;;2
-(define funcs-arr '('+ '- '* 'mod 'neg '= '< '> 'not 'and 'or 'drop 'swap 'dup 'over 'rot 'depth 'if))
+;(define funcs-arr '('+ '- '* 'mod 'neg '= '< '> 'not 'and 'or 'drop 'swap 'dup 'over 'rot 'depth 'if))
+(define funcs-arr '(+ - * mod neg = < > not and or drop swap dup over rot depth if))
 
 (define dict '())
+
+(define x 0)
 
 (define (parse vec)
   ;(parce (vector->list vec) (list dict '())))
@@ -35,33 +38,4 @@
              ((equal? fnel 'exit) (parce (cdr arr) res))
              ((equal? fnel 'end) (parce (cdr arr) res))
              ((equal? fnel 'endif) (parce (cdr arr) res))
-             (else (parce (cdr arr) (append res (list fnel))))))))
-             
-(define (char->digit ch)
-  (- (char->integer ch) (char->integer #\0)))
-
-(define (scan-frac str)
-  (define check-frac-arr (string->list "1234567890-/+"))
-  (define frac 0)
-  (define quot 0)
-  (define sgn +)
-  (define (loop listr aft)
-    (cond
-      ((null? listr) #t)
-      ((memq (car listr) check-frac-arr)
-       (cond
-         ((equal? (car listr)#\/) (loop (cdr listr) 1))
-         ((equal? (car listr)#\+) (loop (cdr listr) aft))
-         ((and  (equal? (car listr) #\-) (= aft 0)) (set! sgn -) (loop (cdr listr) aft))
-         ((and  (equal? (car listr) #\-) (= aft 1)) #f)
-         (else
-          (or
-           (and (equal? aft 0) (set! frac (sgn (* frac 10)
-                                               (char->digit (car listr)))))
-           (and (equal? aft 1) (set! quot (+ (* quot 10)
-                                             (char->digit (car listr))))))
-          (loop (cdr listr) aft))))
-      (else #f)))
-  (and (loop (string->list str) 0)
-       (not (= quot 0)) ;; не знаю, надо ли проверять деление на 0
-       (/ frac quot))) ;; выводить через write! display выводит целую часть из дробей, нам этого не надо!
+             (else (write fnel)(display " ")(set! x (++ x)) (write x)(newline) (parce (cdr arr) (append res (list fnel))))))))
