@@ -1,0 +1,37 @@
+(define (++ x) (+ x 1))
+;;1
+(define (check-frac str)
+  (define check-frac-arr (string->list "1234567890-/+"))
+  (define (loop arr flag-+ flag/)
+    (cond((null? arr) #t)
+         ((and (memq (car arr) check-frac-arr) (not (or (equal? (car arr) #\-) (equal? (car arr)#\/)))) (loop (cdr arr) flag-+ flag/))
+         ((and (memq (car arr) check-frac-arr) (or (equal? (car arr) #\-) (equal? (car arr) #\+)) (= flag-+ 0 flag/)) (loop (cdr arr) (++ flag-+) flag/))
+         ((and (memq (car arr) check-frac-arr) (equal? (car arr) #\/) (= flag/ 0)) (loop (cdr arr) flag-+ (++ flag/)))
+         (else #f)))
+  (loop (string->list str) 0 0))
+
+;;2
+(define funcs-arr '('+ '- '* 'mod 'neg '= '< '> 'not 'and 'or 'drop 'swap 'dup 'over 'rot 'depth 'if))
+
+(define dict '())
+
+(define (parse vec)
+  (parce (vector->list vec) dict))
+
+(define (parce-define arr stack-return)
+  (let ((x (car arr)))
+    (if (equal? x 'end)
+        (set! dict (cons  (cons  (car stack-return)  (list (cdr stack-return))) dict))
+        (parce-define (cdr arr) (append stack-return (list x))))))
+
+(define (parce arr res)
+  (if (null? arr)
+      res
+      (let ((fnel (car arr)))
+        (cond((member fnel funcs-arr) (cons res (list (list fnel (parce (cdr arr) '())))))
+             ((equal? fnel 'define) (cons (cadr arr) funcs-arr) (parce-define (cdr arr) dict) (cons res (list (list (parce (cdr arr) '())))))
+             ;((equal? fnel 'if) (append res (list (parce (cdr arr) '()))))
+             ((equal? fnel 'exit) (parce (cdr arr) res))
+             ((equal? fnel 'end) (parce (cdr arr) res))
+             ((equal? fnel 'endif) (parce (cdr arr) res))
+             (else (parce (cdr arr) (append res (list fnel))))))))

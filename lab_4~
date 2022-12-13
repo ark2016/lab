@@ -1,0 +1,8 @@
+(define (interpret program stack)
+  (do-all (vector->list program) (vector->list program) 0 stack '() '()))
+(define (do-all arr-words now-program word-counter stack-data stack-return dict)
+  (let ((program arr-words))
+    (cond((=(length arr-words)word-counter)  (display stack-data))
+         ((number? (car now-program))
+          (do-all arr-words (cdr now-program) (+ 1 word-counter) (append stack-data  (cons (car now-program) '()))  stack-return dict))
+         (else (display 'eror)))))
